@@ -151,3 +151,10 @@ jobs:
       with:
         files: '*.bin'
         repo-token: ${{ secrets.GH_TOKEN }}
+
+    - uses: actions/checkout@v1
+    - name: Create Debian Package
+      uses: bpicode/github-action-fpm@master
+      with:
+        fpm_args: './GalaxyBudsClient_Linux_64bit_Portable.bin=/usr/local/bin/galaxybudsclient'
+        fpm_opts: '-n galaxybudsclient -t deb -s dir -v "${GITHUB_REF_NAME#v}" --architecture amd64 --description "My awesome CLI tool" --maintainer "Adi Perdana <dewaadiperdana@gmail.com>" --url "https://github.com/${{ github.repository }}" -p pkg/galaxybudsclient_amd64.deb'
