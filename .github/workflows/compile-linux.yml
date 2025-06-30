@@ -158,17 +158,23 @@ jobs:
     if: github.event_name == 'release'
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Download setup artifact (x64)
         uses: actions/download-artifact@v4
         with:
           name: GalaxyBudsClient_linux-amd64_portable
+
+      - name: Prepare package files
+        run: |
+          ls -lah .
       
       - uses: actions/checkout@v1
-      - name: Create Debian Package
+      - name: Create debian package
         uses: bpicode/github-action-fpm@master
         with:
-          fpm_args: './GalaxyBudsClient=/usr/local/bin/galaxybudsclient'
-          fpm_opts: '-n galaxybudsclient -t deb -s dir -v "${GITHUB_REF_NAME#v}" --architecture amd64 --description "My awesome CLI tool" --maintainer "Adi Perdana <dewaadiperdana@gmail.com>" --url "https://github.com/${{ github.repository }}" -p pkg/galaxybudsclient_amd64.deb'
+          fpm_args: 'GalaxyBudsClient'
+          fpm_opts: '-s dir -t deb -n galaxybudsclient -v "${GITHUB_REF_NAME#v}" --architecture amd64 --description "Unofficial Galaxy Buds Manager for Windows, macOS, Linux, and Android" --maintainer "Adi Perdana <dewaadiperdana@gmail.com>" --prefix /usr/local/bin'
 
       - uses: AButler/upload-release-assets@v2.0
         with:
