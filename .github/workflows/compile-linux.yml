@@ -147,14 +147,30 @@ jobs:
     - name: Rename (arm64)
       run: ren GalaxyBudsClient GalaxyBudsClient_Linux_arm64_Portable.bin
 
-    - uses: actions/checkout@v1
-    - name: Create Debian Package
-      uses: bpicode/github-action-fpm@master
-      with:
-        fpm_args: './GalaxyBudsClient_Linux_64bit_Portable.bin=/usr/local/bin/galaxybudsclient'
-        fpm_opts: '-n galaxybudsclient -t deb -s dir -v "${GITHUB_REF_NAME#v}" --architecture amd64 --description "My awesome CLI tool" --maintainer "Adi Perdana <dewaadiperdana@gmail.com>" --url "https://github.com/${{ github.repository }}" -p pkg/galaxybudsclient_amd64.deb'
-
     - uses: AButler/upload-release-assets@v2.0
       with:
-        files: '*.bin;*.deb'
+        files: '*.bin'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
+      
+  publish-debian-packages:
+    runs-on: ubuntu-latest
+    needs: [build-x64]
+    if: github.event_name == 'release'
+
+    steps:
+      - name: Download setup artifact (x64)
+        uses: actions/download-artifact@v4
+        with:
+          name: GalaxyBudsClient_linux-amd64_portable
+      
+      - uses: actions/checkout@v1
+      - name: Create Debian Package
+        uses: bpicode/github-action-fpm@master
+        with:
+          fpm_args: './GalaxyBudsClient=/usr/local/bin/galaxybudsclient'
+          fpm_opts: '-n galaxybudsclient -t deb -s dir -v "${GITHUB_REF_NAME#v}" --architecture amd64 --description "My awesome CLI tool" --maintainer "Adi Perdana <dewaadiperdana@gmail.com>" --url "https://github.com/${{ github.repository }}" -p pkg/galaxybudsclient_amd64.deb'
+
+      - uses: AButler/upload-release-assets@v2.0
+        with:
+          files: '*.deb'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
